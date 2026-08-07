@@ -1,80 +1,36 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useFinance } from "@/context/FinanceContext";
 
 export default function DashboardPage() {
-  const router = useRouter();
+  const { expenses, categories } = useFinance();
 
-  useEffect(() => {
-    const loggedIn = localStorage.getItem("loggedIn");
-
-    if (loggedIn !== "true") {
-      router.replace("/login");
-    }
-  }, [router]);
-
-  function logout() {
-    localStorage.removeItem("loggedIn");
-    router.push("/login");
-  }
+  const totalSpent = expenses.reduce(
+    (sum, expense) => sum + expense.amount,
+    0
+  );
 
   return (
-    <main className="min-h-screen bg-gray-50 text-gray-900">
-      <header className="flex items-center justify-between border-b border-gray-200 bg-white p-6 shadow-sm">
-        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
-          Finance Dashboard
-        </h1>
+    <>
+      <h1 className="mb-8 text-3xl font-bold">
+        Dashboard
+      </h1>
 
-        <button
-          onClick={logout}
-          className="rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-gray-800 transition-colors shadow-sm"
-        >
-          Logout
-        </button>
-      </header>
-
-      <section className="grid gap-6 p-8 md:grid-cols-4">
-        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-sm font-medium text-gray-600">
-            Total Expenses
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <div className="rounded-2xl border bg-white p-6">
+          <p className="text-zinc-500">Total Spent</p>
+          <h2 className="mt-3 text-3xl font-bold">
+            ₹{totalSpent}
           </h2>
-
-          <p className="mt-3 text-3xl font-bold text-gray-900">
-            ₹0
-          </p>
         </div>
 
-        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-sm font-medium text-gray-600">
-            This Month
+        <div className="rounded-2xl border bg-white p-6">
+          <p className="text-zinc-500">Categories</p>
+          <h2 className="mt-3 text-3xl font-bold">
+            {categories.length}
           </h2>
-
-          <p className="mt-3 text-3xl font-bold text-gray-900">
-            ₹0
-          </p>
         </div>
-
-        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-sm font-medium text-gray-600">
-            Categories
-          </h2>
-
-          <p className="mt-3 text-3xl font-bold text-gray-900">
-            9
-          </p>
-        </div>
-
-        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-sm font-medium text-gray-600">
-            Upcoming
-          </h2>
-
-          <p className="mt-3 text-3xl font-bold text-gray-900">
-            0
-          </p>
-        </div>
-      </section>
-    </main>
+      </div>
+    </>
   );
-}
+}
