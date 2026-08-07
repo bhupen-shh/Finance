@@ -48,19 +48,11 @@ export function FinanceProvider({
 
 }) {
 
-  const [expenses, setExpenses] =
+  const { value: expenses, setValue: setExpenses } =
+  useLocalStorage<Expense[]>("expenses", []);
 
-    useLocalStorage<Expense[]>("expenses", []);
-     const [categories, setCategories] =
-
-    useLocalStorage<Category[]>(
-
-      "categories",
-
-      defaultCategories
-
-    );
-
+const { value: categories, setValue: setCategories } =
+  useLocalStorage<Category[]>("categories", defaultCategories);
   function addExpense(expense: Expense) {
 
     setExpenses((prev) => [...prev, expense]);
