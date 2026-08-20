@@ -26,95 +26,10 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
 
 ## Step 3: Create Database Tables
 
-In your Supabase dashboard, go to **SQL Editor** and run the following SQL to create the necessary tables:
+The complete forward-only migration is in `supabase/migrations/20260820000000_create_finance_schema.sql`.
+Run it from the Supabase SQL Editor, or with the Supabase CLI after linking this project. It creates only the `categories` and `expenses` tables; Supabase Auth continues to own users in `auth.users`.
 
-### Users Table (Already managed by Supabase Auth)
-Supabase Auth automatically creates and manages the users table.
-
-### Expenses Table
-
-```sql
--- Create expenses table
-CREATE TABLE IF NOT EXISTS expenses (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  title VARCHAR NOT NULL,
-  amount DECIMAL(10, 2) NOT NULL,
-  category_id UUID NOT NULL,
-  payment_method VARCHAR NOT NULL,
-  date DATE NOT NULL,
-  type VARCHAR NOT NULL DEFAULT 'one-time',
-  notes TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT expense_user_fk FOREIGN KEY (user_id) REFERENCES auth.users(id)
-);
-
--- Create index for faster queries
-CREATE INDEX idx_expenses_user_id ON expenses(user_id);
-CREATE INDEX idx_expenses_date ON expenses(date);
-```
-
-### Categories Table
-
-```sql
--- Create categories table
-CREATE TABLE IF NOT EXISTS categories (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  name VARCHAR NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT category_user_fk FOREIGN KEY (user_id) REFERENCES auth.users(id)
-);
-
--- Create index for faster queries
-CREATE INDEX idx_categories_user_id ON categories(user_id);
-```
-
-### Enable Row Level Security (RLS)
-
-```sql
--- Enable RLS on expenses table
-ALTER TABLE expenses ENABLE ROW LEVEL SECURITY;
-
--- Create RLS policy for expenses (users can only see their own)
-CREATE POLICY "Users can only view their own expenses"
-ON expenses FOR SELECT
-USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can only insert their own expenses"
-ON expenses FOR INSERT
-WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can only update their own expenses"
-ON expenses FOR UPDATE
-USING (auth.uid() = user_id)
-WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can only delete their own expenses"
-ON expenses FOR DELETE
-USING (auth.uid() = user_id);
-
--- Enable RLS on categories table
-ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
-
--- Create RLS policies for categories (users can only see their own)
-CREATE POLICY "Users can only view their own categories"
-ON categories FOR SELECT
-USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can only insert their own categories"
-ON categories FOR INSERT
-WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can only update their own categories"
-ON categories FOR UPDATE
-USING (auth.uid() = user_id)
-WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can only delete their own categories"
-ON categories FOR DELETE
-USING (auth.uid() = user_id);
-```
+The migration also creates indexes, category ownership foreign keys, and separate SELECT, INSERT, UPDATE, and DELETE RLS policies for each table. No existing data is dropped or altered.
 
 ## Step 4: Enable Email/Password Authentication
 
@@ -122,13 +37,7 @@ USING (auth.uid() = user_id);
 2. Make sure "Email" is enabled (it should be by default)
 3. Go to **Authentication** > **Policies** (if needed for custom rules)
 
-## Step 5: Create a Demo User (Optional)
-
-In the **Authentication** > **Users** section, you can create a test user:
-- Email: `test@example.com`
-- Password: `Test123!@#`
-
-## Step 6: Test the Integration
+## Step 5: Test the Integration
 
 1. Start your development server: `npm run dev`
 2. Visit `http://localhost:3000/login`

@@ -4,6 +4,7 @@ import {
   createContext,
   useContext,
   useEffect,
+  useCallback,
   useState,
 } from "react";
 import {
@@ -18,8 +19,11 @@ interface FinanceContextType {
   expenses: Expense[];
   categories: Category[];
   addExpense: (expense: Expense) => Promise<void>;
+  updateExpense: (expense: Expense) => Promise<void>;
   deleteExpense: (id: string) => Promise<void>;
   addCategory: (name: string) => Promise<void>;
+  updateCategory: (id: string, name: string) => Promise<void>;
+  deleteCategory: (id: string) => Promise<void>;
   loading: boolean;
 }
 
@@ -37,31 +41,7 @@ export function FinanceProvider({
   const [loading, setLoading] = useState(true);
 
   // Fetch categories from Supabase
-  const fetchCategories = async () => {
-    if (!isAuthenticated || !user) return;
-
-    try {
-      const { data, error } = await supabase
-        .from("categories")
-        .select("id, name")
-        .eq("user_id", user.id);
-
-      if (error) throw error;
-
-      if (data && data.length > 0) {
-        setCategories(data);
-      } else {
-        // If no categories exist, create default ones
-        await initializeDefaultCategories();
-      }
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-      setCategories([]);
-    }
-  };
-
-  // Initialize default categories for new users
-  const initializeDefaultCategories = async () => {
+  const initializeDefaultCategories = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -82,10 +62,33 @@ export function FinanceProvider({
     } catch (error) {
       console.error("Error initializing default categories:", error);
     }
-  };
+  }, [user]);
+
+  const fetchCategories = useCallback(async () => {
+    if (!isAuthenticated || !user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("id, name")
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        setCategories(data);
+      } else {
+        // If no categories exist, create default ones
+        await initializeDefaultCategories();
+      }
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      setCategories([]);
+    }
+  }, [initializeDefaultCategories, isAuthenticated, user]);
 
   // Fetch expenses from Supabase
-  const fetchExpenses = async () => {
+  const fetchExpenses = useCallback(async () => {
     if (!isAuthenticated || !user) return;
 
     try {
@@ -98,10 +101,10 @@ export function FinanceProvider({
       if (error) throw error;
 
       if (data) {
-        const formattedExpenses: Expense[] = data.map((exp: any) => ({
+        const formattedExpenses: Expense[] = data.map((exp) => ({
           id: exp.id,
           title: exp.title,
-          amount: exp.amount,
+          amount: Number(exp.amount),
           category: exp.category_id,
           paymentMethod: exp.payment_method,
           date: exp.date,
@@ -114,21 +117,26 @@ export function FinanceProvider({
       console.error("Error fetching expenses:", error);
       setExpenses([]);
     }
-  };
+  }, [isAuthenticated, user]);
 
   // Load data when user authenticates
   useEffect(() => {
-    setLoading(true);
-    if (isAuthenticated && user) {
-      Promise.all([fetchCategories(), fetchExpenses()]).finally(() => {
+    const loadData = async () => {
+      setLoading(true);
+
+      if (isAuthenticated && user) {
+        await Promise.all([fetchCategories(), fetchExpenses()]);
         setLoading(false);
-      });
-    } else {
-      setLoading(false);
+        return;
+      }
+
       setExpenses([]);
       setCategories([]);
-    }
-  }, [isAuthenticated, user]);
+      setLoading(false);
+    };
+
+    void loadData();
+  }, [fetchCategories, fetchExpenses, isAuthenticated, user]);
 
   async function addExpense(expense: Expense) {
     if (!user) return;
@@ -174,6 +182,32 @@ export function FinanceProvider({
     }
   }
 
+  async function updateExpense(expense: Expense) {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from("expenses")
+        .update({
+          title: expense.title,
+          amount: expense.amount,
+          category_id: expense.category,
+          payment_method: expense.paymentMethod,
+          date: expense.date,
+          type: expense.type,
+          notes: expense.notes,
+        })
+        .eq("id", expense.id)
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+      await fetchExpenses();
+    } catch (error) {
+      console.error("Error updating expense:", error);
+      throw error;
+    }
+  }
+
   async function addCategory(name: string) {
     if (!user) return;
 
@@ -193,14 +227,53 @@ export function FinanceProvider({
     }
   }
 
+  async function updateCategory(id: string, name: string) {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from("categories")
+        .update({ name })
+        .eq("id", id)
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+      await fetchCategories();
+    } catch (error) {
+      console.error("Error updating category:", error);
+      throw error;
+    }
+  }
+
+  async function deleteCategory(id: string) {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from("categories")
+        .delete()
+        .eq("id", id)
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+      await fetchCategories();
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      throw error;
+    }
+  }
+
   return (
     <FinanceContext.Provider
       value={{
         expenses,
         categories,
         addExpense,
+        updateExpense,
         deleteExpense,
         addCategory,
+        updateCategory,
+        deleteCategory,
         loading,
       }}
     >

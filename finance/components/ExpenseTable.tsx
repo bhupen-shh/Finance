@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { useFinance } from "@/context/FinanceContext";
-import { BarChart3, Trash2 } from "lucide-react";
+import { BarChart3, Pencil, Trash2 } from "lucide-react";
 
 export default function ExpenseTable() {
-  const { expenses, categories, deleteExpense } = useFinance();
+  const { expenses, categories, updateExpense, deleteExpense } = useFinance();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState("");
 
@@ -37,6 +37,31 @@ export default function ExpenseTable() {
       console.error("Error deleting expense:", err);
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleEdit = async (expenseId: string) => {
+    const expense = expenses.find((item) => item.id === expenseId);
+    if (!expense) return;
+
+    const title = prompt("Title:", expense.title)?.trim();
+    if (!title) return;
+    const amountValue = prompt("Amount:", expense.amount.toString());
+    const amount = Number(amountValue);
+    if (!amountValue || !Number.isFinite(amount) || amount < 0) {
+      setError("Enter a valid non-negative amount.");
+      return;
+    }
+    const date = prompt("Date (YYYY-MM-DD):", expense.date)?.trim();
+    if (!date) return;
+    const notes = prompt("Notes:", expense.notes || "") ?? expense.notes;
+
+    setError("");
+    try {
+      await updateExpense({ ...expense, title, amount, date, notes });
+    } catch (error) {
+      setError("Failed to update expense.");
+      console.error("Error updating expense:", error);
     }
   };
 
@@ -100,6 +125,15 @@ export default function ExpenseTable() {
                   {new Date(expense.date).toLocaleDateString()}
                 </td>
                 <td className="py-3 px-4 text-center">
+                  <button
+                    onClick={() => handleEdit(expense.id)}
+                    className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded transition mr-2"
+                    title="Edit expense"
+                    aria-label={`Edit ${expense.title}`}
+                  >
+                    <Pencil className="w-4 h-4" />
+                    <span className="text-xs font-medium">Edit</span>
+                  </button>
                   <button
                     onClick={() => handleDelete(expense.id)}
                     disabled={deletingId === expense.id}

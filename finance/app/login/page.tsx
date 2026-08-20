@@ -51,7 +51,7 @@ export default function Login() {
         setEmail("");
         setPassword("");
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred");
     } finally {
       setIsLoading(false);
@@ -143,15 +143,6 @@ export default function Login() {
             </p>
           </div>
 
-          {/* Info message */}
-          {!isSignup && (
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <p className="text-sm text-gray-700 font-medium mb-2">Demo Account:</p>
-              <p className="text-sm text-gray-600">Email: <span className="font-mono font-semibold text-gray-800">demo@example.com</span></p>
-              <p className="text-sm text-gray-600">Password: <span className="font-mono font-semibold text-gray-800">password123</span></p>
-              <p className="text-xs text-gray-500 mt-2">Or create a new account using the form above.</p>
-            </div>
-          )}
         </div>
       </div>
     </div>

@@ -4,9 +4,6 @@ import { createContext, useContext, ReactNode, useEffect, useState } from "react
 import { supabase } from "@/lib/supabase";
 import { User } from "@supabase/supabase-js";
 
-const DEMO_EMAIL = "demo@example.com";
-const DEMO_PASSWORD = "password123";
-
 interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
@@ -19,40 +16,14 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-// Initialize demo account if it doesn't exist
-async function initializeDemoAccount() {
-  try {
-    // Try to sign up the demo account
-    const { error } = await supabase.auth.signUp({
-      email: DEMO_EMAIL,
-      password: DEMO_PASSWORD,
-    });
-
-    if (error) {
-      // Account already exists or other error - that's fine
-      if (!error.message?.includes("already registered")) {
-        console.log("Demo account initialization note:", error.message);
-      }
-    } else {
-      console.log("Demo account created successfully");
-    }
-  } catch (err) {
-    console.log("Demo account initialization attempt completed");
-  }
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Initialize demo account and check for existing session
+    // Check for an existing Supabase Auth session.
     const initializeAuth = async () => {
       try {
-        // Create demo account if needed
-        await initializeDemoAccount();
-
-        // Check for existing session
         const { data } = await supabase.auth.getSession();
         setUser(data?.session?.user || null);
       } catch (error) {
@@ -86,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: error.message };
       }
       return { error: null };
-    } catch (error) {
+    } catch {
       return { error: "An unexpected error occurred" };
     }
   };
@@ -101,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: error.message };
       }
       return { error: null };
-    } catch (error) {
+    } catch {
       return { error: "An unexpected error occurred" };
     }
   };
