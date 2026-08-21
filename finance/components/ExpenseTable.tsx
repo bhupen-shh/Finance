@@ -80,7 +80,7 @@ export default function ExpenseTable() {
   }
 
   return (
-    <div className="bg-white shadow-lg rounded-lg p-6">
+    <div className="min-w-0 rounded-lg bg-white p-4 shadow-lg sm:p-6">
       <div className="flex items-center gap-2 mb-4">
         <BarChart3 className="w-6 h-6 text-blue-600" />
         <h3 className="text-xl font-bold text-gray-800">Recent Expenses</h3>

@@ -37,19 +37,19 @@ export default function Home() {
 
   return (
     <FinanceProvider>
-      <div className="flex h-screen bg-gray-100">
+      <div className="flex h-screen min-w-0 overflow-x-hidden bg-gray-100">
         <Sidebar />
-        <div className="flex-1 flex flex-col">
+        <div className="flex min-w-0 flex-1 flex-col">
           <Navbar />
-          <main className="flex-1 overflow-auto p-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <main className="min-w-0 flex-1 overflow-auto p-4 sm:p-5 min-[1200px]:p-6">
+            <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 min-[1200px]:grid-cols-3 min-[1200px]:gap-6">
               <Statscard />
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-              <div className="lg:col-span-2">
+            <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 min-[1200px]:grid-cols-3 min-[1200px]:gap-6">
+              <div className="min-w-0 min-[1200px]:col-span-2">
                 <DashboardCharts />
               </div>
-              <div>
+              <div className="min-w-0">
                 <ExpenseForm />
               </div>
             </div>

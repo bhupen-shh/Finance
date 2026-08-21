@@ -50,7 +50,7 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="w-64 bg-gradient-to-b from-gray-900 to-gray-800 shadow-lg text-white p-6 h-screen overflow-y-auto">
+    <aside className="hidden h-screen w-48 shrink-0 overflow-y-auto bg-gradient-to-b from-gray-900 to-gray-800 p-4 text-white shadow-lg md:block min-[1200px]:w-64 min-[1200px]:p-6">
       <div className="mb-8">
         <h2 className="text-2xl font-bold mb-2">Menu</h2>
         <p className="text-gray-400 text-sm">Navigate your finances</p>

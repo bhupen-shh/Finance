@@ -33,13 +33,13 @@ export default function DashboardCharts() {
   };
 
   return (
-    <div className="bg-white shadow-lg rounded-lg p-6">
-      <div className="flex items-center gap-2 mb-6">
+    <div className="min-w-0 rounded-lg bg-white p-4 shadow-lg sm:p-6">
+      <div className="mb-6 flex items-center gap-2">
         <TrendingUp className="w-6 h-6 text-blue-600" />
         <h3 className="text-xl font-bold text-gray-800">Expense Breakdown</h3>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 gap-6 min-[1200px]:grid-cols-2 min-[1200px]:gap-8">
         {/* Category Breakdown */}
         <div>
           <h4 className="font-semibold text-gray-700 mb-4">By Category</h4>
@@ -101,7 +101,7 @@ export default function DashboardCharts() {
 
       {/* Summary Stats */}
       <div className="mt-6 pt-6 border-t border-gray-200">
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className="text-center">
             <p className="text-gray-600 text-sm">Total Expenses</p>
             <p className="text-2xl font-bold text-blue-600">₹{totalExpenses.toFixed(2)}</p>

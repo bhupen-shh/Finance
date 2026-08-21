@@ -69,7 +69,7 @@ export default function ExpenseForm() {
   };
 
   return (
-    <div className="bg-white shadow-lg rounded-lg p-6 h-full">
+    <div className="h-full min-w-0 rounded-lg bg-white p-4 shadow-lg sm:p-6">
       <div className="flex items-center gap-2 mb-4">
         <Plus className="w-6 h-6 text-blue-600" />
         <h3 className="text-xl font-bold text-gray-800">Add New Expense</h3>
